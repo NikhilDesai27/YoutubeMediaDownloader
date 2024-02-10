@@ -35,7 +35,7 @@ class FacetFilterDerivedFromDataset(FacetFilter):
     def __init__(self, key: str):
         pass
 
-    def add_option(self, option: Optional[Union[str, Collection[str], int]]) -> None:
+    def add_option(self, option: Optional[Union[str, int]]) -> None:
         pass
 
 class FacetFilterConstraintCreatedFromConstraint(FacetFilterConstraint):
@@ -53,7 +53,7 @@ class FacetFilterWithStrOptions:
         self.__key = key
         self.__options: Set[str] = set()
 
-    def add_option(self, option: Optional[Union[str, Collection[str], int]]) -> None:
+    def add_option(self, option: Optional[Union[str, int]]) -> None:
         if not isinstance(option, str):
             raise TypeError("option must be of type 'str'")
         if not option:

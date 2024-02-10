@@ -16,7 +16,7 @@ class PytubeStreamAsYoutubeMedia:
     def media_type(self) -> str:
         if self.stream.is_progressive:
             return "Audio-and-Video"
-        if self.includes_audio_track:
+        if self.stream.includes_audio_track:
             return "Audio"
         return "Video"
     

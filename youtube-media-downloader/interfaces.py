@@ -44,7 +44,7 @@ class Faceted(Protocol):
     def facet_views(self) -> Collection[str]:
         pass
 
-    def facet_view_value(self, facet_key: str) -> Optional[Union[str, Collection[str], int]]:
+    def facet_view_value(self, facet_key: str) -> Optional[Union[str, int]]:
         pass
 
 class FacetFilter(Protocol):

@@ -1,4 +1,4 @@
-from typing import List, Type, Set, Callable, Any, Collection, Tuple, Optional, Union, Iterable, Mapping
+from typing import List, Type, Set, Callable, Any, Collection, Tuple, Optional, Union, Iterable, Mapping, Dict
 from interfaces import FacetFilter, FacetFilterConstraint, Faceted
 
 def __raise(
@@ -28,21 +28,11 @@ def __raise_value_error_if_arg_is_empty_string(arg: Any, err_msg: str) -> None:
         err_msg
     )
 
-def __raise_type_error_if_arg_is_not_a_collection_of_faceted_objects(arg: Any, err_msg: str) -> None:
-    def is_not_a_collection_of_faceted_objects(arg: Any) -> bool:
-        if not isinstance(arg, Collection):
-            return True
-        if not all([isinstance(el, Faceted) for el in arg]):
-            return True
-        return False
-    __raise(
-        arg,
-        is_not_a_collection_of_faceted_objects,
-        TypeError,
-        err_msg
-    )
-
 class FacetFilterDerivedFromDataset(FacetFilter):
+    # mypy requires this, don't know why, must figure out
+    def __init__(self, key: str):
+        pass
+
     def add_option(self, option: Optional[Union[str, Collection[str], int]]) -> None:
         pass
 
@@ -51,29 +41,21 @@ class FacetFilterConstraintCreatedFromConstraint(FacetFilterConstraint):
     def from_constraint(cls, constraint: Tuple[str, Any]):
         pass
 
-class SingleSelectionFacetFilter:
+class FacetFilterWithStrOptions:
 
     def __init__(self, key: str) -> None:
-        __raise_type_error_if_arg_not_string(
-            key,
-            "Facet key must be of type 'str'"
-        )
-        __raise_value_error_if_arg_is_empty_string(
-            key,
-            "Facet key cannot be an empty string"
-        )
+        if not isinstance(key, str):
+            raise TypeError("Facet key must be of type 'str'")
+        if not key:
+            raise ValueError("Facet key cannot be an empty string")
         self.__key = key
         self.__options: Set[str] = set()
 
     def add_option(self, option: Optional[Union[str, Collection[str], int]]) -> None:
-        __raise_type_error_if_arg_not_string(
-            option,
-            "option must be of type 'str'"
-        )
-        __raise_value_error_if_arg_is_empty_string(
-            option,
-            "option cannot be an empty string"
-        )
+        if not isinstance(option, str):
+            raise TypeError("option must be of type 'str'")
+        if not option:
+            raise ValueError("option cannot be an empty string")
         self.__options.add(option)
 
     def key(self) -> str:
@@ -113,7 +95,7 @@ class SingleSelectionFacetFilterConstraint:
     @classmethod
     def from_constraint(cls, constraint: Tuple[str, Any]):
         def _two_tuple_of_strings(c: Any) -> bool:
-            if not isinstance(c, Tuple):
+            if not isinstance(c, tuple):
                 return True
             if not len(c) == 2:
                 return True
@@ -147,10 +129,10 @@ class FacetFilterComponentImpl:
                 return possible_facet_filter_obj
             except:
                 continue
-        # raise FacetFilterDerivationError()
+        raise ValueError()
     
     def __derive(self, dataset: Iterable[Faceted]) -> Collection[FacetFilter]:
-        facet_filter_for_view: Mapping[str, FacetFilterDerivedFromDataset] = dict()
+        facet_filter_for_view: Dict[str, FacetFilterDerivedFromDataset] = dict()
         for datum in dataset:
             for facet_view in datum.facet_views():
                 facet_view_value = datum.facet_view_value(facet_view)
@@ -165,7 +147,7 @@ class FacetFilterComponentImpl:
 
     def derive_facet_filters(self, dataset: Iterable[Faceted]) -> Collection[FacetFilter]:
         facet_filters = self.__derive(dataset)
-        return [facet_filter for facet_filter in facet_filters if len(facet_filter.options) > 1]
+        return [facet_filter for facet_filter in facet_filters if len(facet_filter.options()) > 1]
     
     def __facet_filter_constraints_from_constraints(self, constraints: Mapping[str, Any]) -> Collection[FacetFilterConstraint]:
         facet_filter_constraints: List[FacetFilterConstraint] = []

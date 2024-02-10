@@ -29,7 +29,9 @@ def __raise_value_error_if_arg_is_empty_string(arg: Any, err_msg: str) -> None:
     )
 
 class FacetFilterDerivedFromDataset(FacetFilter):
-    # mypy requires this, don't know why, must figure out
+    # Since, we are dealing with multiple sub-types
+    # of this and also initializing one of them
+    # this Protocol must specify that it's __init__ can take in a 'str' key
     def __init__(self, key: str):
         pass
 
